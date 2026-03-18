@@ -1,3 +1,4 @@
+#NCP Cloud Insight 에이전트 일괄 업그레이드 작업
 ---
 - name: Agent reinstall playbook
   hosts: vpc
