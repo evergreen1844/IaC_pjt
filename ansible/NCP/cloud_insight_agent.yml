@@ -1,0 +1,68 @@
+---
+- name: Agent reinstall playbook
+  hosts: vpc
+  become: yes
+
+  vars:
+    base_path: /home1/nbpmon
+    agent_path: /home1/nbpmon/agent_controller_linux
+    ca_path: /home1/nbpmon/agent_controller_linux/ca
+    download_url: https://real-repo.nsight.gov-ncloud.com/agent_controller_linux_ncp.tar.gz
+    tar_file: agent_controller_linux_ncp.tar.gz
+
+  tasks:
+
+    - name: Check if CA directory exists
+      stat:
+        path: "{{ ca_path }}"
+      register: ca_dir
+
+    - name: Uninstall existing agent
+      shell: "{{ agent_path }}/uninstall_agent.sh"
+      args:
+        chdir: "{{ agent_path }}"
+      when: ca_dir.stat.exists
+
+    - name: Remove existing agent directory
+      file:
+        path: "{{ agent_path }}"
+        state: absent
+      when: ca_dir.stat.exists
+
+    - name: Download agent package
+      get_url:
+        url: "{{ download_url }}"
+        dest: "{{ base_path }}/{{ tar_file }}"
+        mode: '0644'
+      when: ca_dir.stat.exists
+
+    - name: Extract agent package
+      unarchive:
+        src: "{{ base_path }}/{{ tar_file }}"
+        dest: "{{ base_path }}"
+        remote_src: yes
+      when: ca_dir.stat.exists
+
+    - name: Install agent
+      shell: "./install_agent.sh gov-classic"
+      args:
+        chdir: "{{ agent_path }}"
+      when: ca_dir.stat.exists
+
+    - name: Check agent_updater process
+      shell: "ps -ef | grep agent_updater.py | grep -v grep"
+      register: updater_result
+      ignore_errors: yes
+
+    - name: Show agent_updater process
+      debug:
+        var: updater_result.stdout_lines
+
+    - name: Check agent process
+      shell: "ps -ef | grep agent.py | grep -v grep"
+      register: agent_result
+      ignore_errors: yes
+
+    - name: Show agent process
+      debug:
+        var: agent_result.stdout_lines

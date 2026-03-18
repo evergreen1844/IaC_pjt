@@ -1,0 +1,3 @@
+#SSH 포트가 22가 아닐 경우, ansible_port 명시 필요
+[managed]
+djlee-test-np01-w-eddb ansible_host=10.20.10.6 ansible_port=2222 ansible_user=djlee
