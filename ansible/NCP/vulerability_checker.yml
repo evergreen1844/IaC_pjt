@@ -1,0 +1,13 @@
+- name: vulerability checker
+  hosts: all
+  become: yes
+  tasks:
+    - name: old checker file delete
+      shell: rm -rf /system_checker/ncp_checker_agent.sh
+    - name: script copy
+      copy:
+        src: /system_checker/ncp_checker_agent.sh
+        dest: /system_checker/ncp_checker_agent.sh
+        mode: '0700'
+    - name: script exec
+      command: sh /system_checker/ncp_checker_agent.sh

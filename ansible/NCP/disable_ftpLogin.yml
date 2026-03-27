@@ -1,0 +1,18 @@
+- name: Disable login shell for ftp account
+  hosts: all
+  become: yes
+  tasks:
+    - name: Check current shell for ftp user
+      command: awk -F: '$1=="ftp"{print $7}' /etc/passwd
+      register: ftp_shell
+
+    - name: Change ftp shell to /bin/false if needed (file edit fallback)
+      lineinfile:
+        path: /etc/passwd
+        regexp: '^ftp:.*'
+        line: 'ftp:x:500:100:Anonymous FTP USER:/var/ftp:/bin/false'
+      when: ftp_shell.stdout != "/bin/false"
+
+    - name: Ensure shell is updated using usermod (fallback step)
+      command: usermod -s /bin/false ftp
+      when: ftp_shell.stdout != "/bin/false"
