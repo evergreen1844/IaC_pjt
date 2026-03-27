@@ -1,3 +1,4 @@
+#NCP 취약점 점검
 - name: vulerability checker
   hosts: all
   become: yes
